@@ -1,0 +1,7 @@
+## Interface: 30300
+## Title: Beast Guild Raid Group Swapper
+## Notes: Adds /raidswap Player1 Player2 to chat commands
+## Author: Bubbletwink / Hoffa
+## SavedVariables: BeastGuildVariableDB
+
+BeastGuild.lua
