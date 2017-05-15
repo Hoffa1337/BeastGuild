@@ -154,6 +154,18 @@ function SlashRaidSwap( args )
 	SwapPlayerByName( newArgs[1], newArgs[2] )
 end 
 
-SlashCmdList_AddSlashCommand( "BEASTGUILD", SlashRaidSwap, "/raidswap" )
+function MarkClass( args )
+	local newArgs = split( args, "%s" )
+	local currentShammy = 1
+	for i=1, 40 do 
+		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
+		if( string.lower(class) == string.lower(args[1]) ) then 
+			SetRaidTargetIcon("raid"..i, currentShammy)
+			currentShammy = currentShammy + 1
+		end 
+	end 
+end 
 
+SlashCmdList_AddSlashCommand( "BEASTGUILD", SlashRaidSwap, "/raidswap" )
 SlashCmdList_AddSlashCommand( "BEASTGUILD", PutShaman, "/putshaman" )
+SlashCmdList_AddSlashCommand( "BEASTGUILD", MarkClass, "/MarkClass" )
