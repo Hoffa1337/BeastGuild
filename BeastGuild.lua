@@ -157,9 +157,13 @@ end
 function MarkClass( args )
 	local newArgs = split( args, "%s" )
 	local currentShammy = 1
+	if( #newArgs == 0 ) then 
+		newArgs = {}
+		newArgs[1] = "Shaman"
+	end 
 	for i=1, 40 do 
 		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
-		if( string.lower(class) == string.lower(args[1]) ) then 
+		if( string.lower(class) == string.lower(newArgs[1]) ) then 
 			SetRaidTargetIcon("raid"..i, currentShammy)
 			currentShammy = currentShammy + 1
 		end 
@@ -168,4 +172,4 @@ end
 
 SlashCmdList_AddSlashCommand( "BEASTGUILD", SlashRaidSwap, "/raidswap" )
 SlashCmdList_AddSlashCommand( "BEASTGUILD", PutShaman, "/putshaman" )
-SlashCmdList_AddSlashCommand( "BEASTGUILD", MarkClass, "/MarkClass" )
+SlashCmdList_AddSlashCommand( "BEASTGUILD", MarkClass, "/markclass" )
