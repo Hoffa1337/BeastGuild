@@ -172,10 +172,9 @@ function MarkClass( args )
 	if( args == nil or not args or args == "" ) then 
 		args = "Shaman"
 	end 
-	--SendChatMessage( "[RaidSwap] Args:"..args, "RAID", GetDefaultLanguage("player" ))
 	for i=1, 40 do 
 		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
-		if( string.lower(class) == string.lower(args) ) then 
+		if( class ~= nil and name ~= nil and string.lower(class) == string.lower(args) ) then 
 			SetRaidTargetIcon("raid"..i, currentShammy)
 			SendChatMessage( "[RaidSwap] Group #"..subgroup.." - "..name.." "..Icons[currentShammy], "RAID", GetDefaultLanguage("player" ))
 			currentShammy = currentShammy + 1
