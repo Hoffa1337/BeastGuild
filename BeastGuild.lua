@@ -1,8 +1,12 @@
+function IsNil( a ) 
+	return ( a == nil ) or ( not a ) or ( a == "" )
+end 
+
 function SwapPlayerByName( player1, player2 )
 	local player1Group = 0
-	local player2Group  = 0
+	local player2Group  = -1
 	local player1ID = 0
-	local player2ID = 0
+	local player2ID = -1
 	
 	if( player1 == "%t" ) then
 		player1 = GetUnitName("target")
@@ -21,18 +25,17 @@ function SwapPlayerByName( player1, player2 )
 		end 
 	end 
 	if( player1Group == player2Group ) then 
-		SendChatMessage( "Can't swap "..player1.." with "..player2.." because they are in the same group!!", "RAID", GetDefaultLanguage("player" ))
+		SendChatMessage( "[RaidSwap] Can't swap "..player1.." with "..player2.." because they are in the same group!!", "RAID", GetDefaultLanguage("player" ))
 		return 
 	end 
 	
 	if( player1Group == 0 or player2Group == 0 ) then 
-		SendChatMessage( "Failed to Swap Players", "RAID", GetDefaultLanguage("player" ))
+		SendChatMessage( "[RaidSwap] Failed to Swap Players", "RAID", GetDefaultLanguage("player" ))
 		return 
 	end 
 		
-	SendChatMessage( "Swapping Players", "RAID", GetDefaultLanguage("player" ))
-	SendChatMessage( player1.." -> Group #"..player2Group, "RAID", GetDefaultLanguage("player" ))
-	SendChatMessage( player2.." -> Group #"..player1Group, "RAID", GetDefaultLanguage("player" ))
+	SendChatMessage( "[RaidSwap] "..player1.." -> Group #"..player2Group, "RAID", GetDefaultLanguage("player" ))
+	SendChatMessage( "[RaidSwap] "..player2.." -> Group #"..player1Group, "RAID", GetDefaultLanguage("player" ))
 	SetRaidSubgroup( player1ID, 6 )
 	SetRaidSubgroup( player2ID, 6 )
 	SetRaidSubgroup( player1ID, player2Group )
@@ -81,17 +84,17 @@ function GiveMeShaman( group )
 		end 
 	end 
 	if( targetGroup < 1 or targetGroup > 8 ) then 
-		SendChatMessage( "Invalid Raid Group: "..targetGroup, "RAID", GetDefaultLanguage("player" ))
+		SendChatMessage( "[RaidSwap] Invalid Raid Group: "..targetGroup, "RAID", GetDefaultLanguage("player" ))
 		return 
 	end 
 	
 	if( groupCounts[targetGroup] >= 5 and #group > 0 ) then 
-		SendChatMessage( "Raid Group #"..targetGroup.." is full", "RAID", GetDefaultLanguage("player" ))
+		SendChatMessage( "[RaidSwap] Raid Group #"..targetGroup.." is full", "RAID", GetDefaultLanguage("player" ))
 		return 
 	end 
 	
 	if( found == 0 ) then 
-		SendChatMessage( "Could not find a shaman to put in Raid Group #"..targetGroup, "RAID", GetDefaultLanguage("player" ))
+		SendChatMessage( "[RaidSwap] Could not find a shaman to put in Raid Group #"..targetGroup, "RAID", GetDefaultLanguage("player" ))
 		return 
 	end 
 	if( #group == 0 ) then 
@@ -105,9 +108,9 @@ function GiveMeShaman( group )
 	end 
 	
 	if( #group == 0 ) then 
-		SendChatMessage( "Giving a Shaman to Group #"..targetGroup.. " replacing "..target, "RAID", GetDefaultLanguage("player" ))
+		SendChatMessage( "[RaidSwap] Giving a Shaman to Group #"..targetGroup.. " replacing "..target, "RAID", GetDefaultLanguage("player" ))
 	else 
-		SendChatMessage( "Giving a Shaman to Group #"..targetGroup, "RAID", GetDefaultLanguage("player" ))
+		SendChatMessage( "[RaidSwap] Giving a Shaman to Group #"..targetGroup, "RAID", GetDefaultLanguage("player" ))
 	end 
 	
 end 
@@ -154,22 +157,32 @@ function SlashRaidSwap( args )
 	SwapPlayerByName( newArgs[1], newArgs[2] )
 end 
 
+local Icons = {}
+Icons[1] = "{star}"
+Icons[2] = "{circle}"
+Icons[3] = "{diamond}"
+Icons[4] = "{triangle}"
+Icons[5] = "{moon}"
+Icons[6] = "{square}"
+Icons[7] = "{cross}"
+Icons[8] = "{skull}"
+
 function MarkClass( args )
-	local newArgs = split( args, "%s" )
 	local currentShammy = 1
-	if( #newArgs == 0 ) then 
-		newArgs = {}
-		newArgs[1] = "Shaman"
+	if( args == nil or not args or args == "" ) then 
+		args = "Shaman"
 	end 
+	--SendChatMessage( "[RaidSwap] Args:"..args, "RAID", GetDefaultLanguage("player" ))
 	for i=1, 40 do 
 		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
-		if( string.lower(class) == string.lower(newArgs[1]) ) then 
+		if( string.lower(class) == string.lower(args) ) then 
 			SetRaidTargetIcon("raid"..i, currentShammy)
+			SendChatMessage( "[RaidSwap] Group #"..subgroup.." - "..name.." "..Icons[currentShammy], "RAID", GetDefaultLanguage("player" ))
 			currentShammy = currentShammy + 1
 		end 
 	end 
 end 
 
 SlashCmdList_AddSlashCommand( "BEASTGUILD", SlashRaidSwap, "/raidswap" )
-SlashCmdList_AddSlashCommand( "BEASTGUILD", PutShaman, "/putshaman" )
-SlashCmdList_AddSlashCommand( "BEASTGUILD", MarkClass, "/markclass" )
+SlashCmdList_AddSlashCommand( "BEASTGUILD2", PutShaman, "/putshaman" )
+SlashCmdList_AddSlashCommand( "BEASTGUILD3", MarkClass, "/markclass" )
