@@ -29,7 +29,7 @@ function SwapPlayerByName( player1, player2 )
 		return 
 	end 
 	
-	if( player1Group == 0 or player2Group == 0 ) then 
+	if( player1Group == 0 or player2Group == -1 ) then 
 		SendChatMessage( "[RaidSwap] Failed to Swap Players", "RAID", GetDefaultLanguage("player" ))
 		return 
 	end 
@@ -54,8 +54,8 @@ end
 
 
 function GiveMeShaman( group )
-	local targetGroup = GetTargetGroup(GetUnitName("target"))
 	local target = GetUnitName("target")
+	local targetGroup = GetTargetGroup(target)
 	local found = 0  
 	local targetID = 0 
 	local shammysOldGroup = 0 
@@ -182,6 +182,62 @@ function MarkClass( args )
 	end 
 end 
 
+local oldPlayerGroups = {}
+
+function SaveRaidComp() 
+	for i=1, 25 do 
+		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
+		if( name ~= nil ) then 
+			oldPlayerGroups[i] = { name, i, subgroup }
+		end 
+	end 
+	SendChatMessage( "[RaidSwap] Saved current raid composition", "RAID", GetDefaultLanguage("player" ))
+end 
+
+function MoveCorpsesToOffGroups()
+	local countDead = 0 
+	local currentGroup = 6 
+	for i=1, 40 do 
+		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
+		local isded = UnitIsDead("raid"..i) 
+		local isghost = UnitIsGhost("raid"..i)
+		--SendChatMessage( "[RaidSwap] Debug: "..name.." Dead="..tostring(isded).. " Ghost="..tostring(isghost), "RAID", GetDefaultLanguage("player" ))
+		if( isded or isghost ) then 
+			countDead = countDead + 1 
+			if( countDead > 5 and currentGroup < 8 ) then 
+				countDead = countDead - 5 
+				currentGroup = currentGroup + 1 
+			end 
+		
+			if( countDead < 5 and currentGroup <= 8 ) then 
+				SetRaidSubgroup( i, currentGroup )
+			end 
+		end 
+	end 
+	SendChatMessage( "[RaidSwap] Cleaning up dead plebs", "RAID", GetDefaultLanguage("player" ))
+end 
+
+function RestoreGroupsAfterCleanup()
+	local movedFirst = false 
+	local oldGroup = 1
+	for i=1,5,40 do 
+		SetRaidSubgroup( i, 8 )
+	end 
+	for k,v in pairs( oldPlayerGroups ) do 
+		for i=1, 40 do 
+			local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
+			if( name == v[1] ) then 						
+				SetRaidSubgroup( v[2], v[3] )
+			end 
+		end 
+	end 
+	SendChatMessage( "[RaidSwap] Restoring Raid Composition", "RAID", GetDefaultLanguage("player" ))
+end 
+
 SlashCmdList_AddSlashCommand( "BEASTGUILD", SlashRaidSwap, "/raidswap" )
 SlashCmdList_AddSlashCommand( "BEASTGUILD2", PutShaman, "/putshaman" )
 SlashCmdList_AddSlashCommand( "BEASTGUILD3", MarkClass, "/markclass" )
+SlashCmdList_AddSlashCommand( "BEASTGUILD4", RestoreGroupsAfterCleanup, "/restoreraidcomp" )
+SlashCmdList_AddSlashCommand( "BEASTGUILD5", SaveRaidComp, "/saveraidcomp" )
+SlashCmdList_AddSlashCommand( "BEASTGUILD6", MoveCorpsesToOffGroups, "/movecorpses" )
+
